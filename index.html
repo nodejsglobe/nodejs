@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeJS - Decentralized Node Infrastructure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #68a063;
+            --primary-dark: #5a8f55;
+            --secondary: #83c683;
+            --dark: #0f0f23;
+            --darker: #0a0a1b;
+            --light: #ffffff;
+            --gray: #9ca3af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 15, 35, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(104, 160, 99, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: "⬢";
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(104, 160, 99, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, transparent 0%, rgba(104, 160, 99, 0.1) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(104, 160, 99, 0.3) 0%, transparent 70%);
+            top: -250px;
+            right: -250px;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--light) 0%, var(--gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text .highlight {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .hero-image {
+            position: relative;
+        }
+
+        .node-visual {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(104, 160, 99, 0.1) 0%, rgba(131, 198, 131, 0.1) 100%);
+            border-radius: 1rem;
+            border: 2px solid rgba(104, 160, 99, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .node-visual::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2368a063' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 4rem 2rem;
+            background: rgba(104, 160, 99, 0.05);
+        }
+
+        .stats-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(104, 160, 99, 0.1) 0%, rgba(131, 198, 131, 0.1) 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 2rem;
+        }
+
+        .features-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 4rem;
+            font-size: 1.25rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(104, 160, 99, 0.05) 0%, rgba(131, 198, 131, 0.05) 100%);
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(104, 160, 99, 0.2);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--gray);
+        }
+
+        /* Node Plans */
+        .plans {
+            padding: 6rem 2rem;
+            background: rgba(104, 160, 99, 0.05);
+        }
+
+        .plans-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .plan-card {
+            background: var(--dark);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            border: 2px solid rgba(104, 160, 99, 0.2);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .plan-card.featured {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .plan-card.featured::before {
+            content: "POPULAR";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 0.25rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .plan-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .plan-duration {
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .plan-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(104, 160, 99, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .plan-features li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Network Status Page */
+        .network-status {
+            display: none;
+            padding: 6rem 2rem 2rem;
+            min-height: 100vh;
+            background: var(--darker);
+        }
+
+        .network-status.active {
+            display: block;
+        }
+
+        .network-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .network-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .network-node {
+            background: linear-gradient(135deg, rgba(104, 160, 99, 0.1) 0%, rgba(131, 198, 131, 0.1) 100%);
+            border: 1px solid rgba(104, 160, 99, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .network-node::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-status 2s infinite;
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        }
+
+        .node-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .node-stats {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .node-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(104, 160, 99, 0.1);
+        }
+
+        .node-stat-label {
+            color: var(--gray);
+        }
+
+        .node-stat-value {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .network-map {
+            background: var(--dark);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .network-visualization {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .node-point {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(104, 160, 99, 0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .node-connection {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: flow-connection 3s linear infinite;
+        }
+
+        @keyframes flow-connection {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Contact Form */
+        .contact-section {
+            display: none;
+            padding: 6rem 2rem;
+            min-height: 100vh;
+            background: var(--darker);
+        }
+
+        .contact-section.active {
+            display: block;
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-form {
+            background: var(--dark);
+            padding: 3rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--gray);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--darker);
+            border: 1px solid rgba(104, 160, 99, 0.3);
+            border-radius: 0.5rem;
+            color: var(--light);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Dashboard Preview */
+        .dashboard-preview {
+            padding: 6rem 2rem;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .dashboard-sidebar {
+            background: var(--dark);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(104, 160, 99, 0.1);
+            color: var(--primary);
+        }
+
+        .dashboard-content {
+            background: var(--dark);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-stat {
+            background: linear-gradient(135deg, rgba(104, 160, 99, 0.1) 0%, rgba(131, 198, 131, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(104, 160, 99, 0.2);
+        }
+
+        .dashboard-stat-label {
+            color: var(--gray);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Node Activity */
+        .node-activity {
+            background: rgba(104, 160, 99, 0.05);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--darker);
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .activity-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem 2rem;
+            background: var(--dark);
+            border-top: 1px solid rgba(104, 160, 99, 0.2);
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(104, 160, 99, 0.1);
+            color: var(--gray);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--dark);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid var(--primary);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--light);
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        .back-to-top:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+            
+            .plans-grid,
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .plan-card.featured {
+                transform: scale(1);
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .counter {
+            animation: countUp 2s ease-out;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">NodeJS</div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#features">Features</a>
+                <a href="#nodes">Nodes</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#dashboard">Dashboard</a>
+                <a href="#" class="btn btn-outline" onclick="openModal('wallet')">Connect Wallet</a>
+                <a href="#" class="btn btn-primary" onclick="openModal('login')">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="mainContent">
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <div class="hero-text fade-in">
+                    <h1>Deploy Your <span class="highlight">Masternode</span> in Minutes</h1>
+                    <p>Join the decentralized revolution with our enterprise-grade node infrastructure. Earn rewards, secure networks, and be part of the blockchain ecosystem.</p>
+                    <div class="hero-buttons">
+                        <a href="#" class="btn btn-primary" onclick="openModal('signup')">Start Your Node</a>
+                        <a href="#pricing" class="btn btn-outline">View Plans</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="node-visual">
+                        <div style="text-align: center; z-index: 1;">
+                            <div style="font-size: 4rem; margin-bottom: 1rem;">⬢</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;">Active Nodes</div>
+                            <div style="font-size: 3rem; font-weight: bold; color: var(--primary);" id="nodeCounter">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="stats-container">
+                <div class="stat-card counter">
+                    <div class="stat-number" data-target="12847">0</div>
+                    <div class="stat-label">Active Nodes</div>
+                </div>
+                <div class="stat-card counter">
+                    <div class="stat-number" data-target="99.98">0</div>
+                    <div class="stat-label">Uptime %</div>
+                </div>
+                <div class="stat-card counter">
+                    <div class="stat-number">$<span data-target="2.4">0</span>M</div>
+                    <div class="stat-label">Total Value Locked</div>
+                </div>
+                <div class="stat-card counter">
+                    <div class="stat-number" data-target="45">0</div>
+                    <div class="stat-label">Supported Chains</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="features-container">
+                <h2 class="section-title fade-in">Why Choose NodeJS?</h2>
+                <p class="section-subtitle fade-in">Enterprise-grade infrastructure for the decentralized world</p>
+                
+                <div class="features-grid">
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">🚀</div>
+                        <h3 class="feature-title">One-Click Deploy</h3>
+                        <p class="feature-description">Deploy your masternode in seconds with our automated setup process. No technical knowledge required.</p>
+                    </div>
+                    
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">🔒</div>
+                        <h3 class="feature-title">Military-Grade Security</h3>
+                        <p class="feature-description">Your nodes are protected with enterprise security, DDoS protection, and 24/7 monitoring.</p>
+                    </div>
+                    
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">📊</div>
+                        <h3 class="feature-title">Real-Time Analytics</h3>
+                        <p class="feature-description">Monitor your node performance, rewards, and network status with our advanced dashboard.</p>
+                    </div>
+                    
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">💰</div>
+                        <h3 class="feature-title">Automatic Rewards</h3>
+                        <p class="feature-description">Receive your staking rewards automatically to your wallet. No manual claiming needed.</p>
+                    </div>
+                    
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">🌍</div>
+                        <h3 class="feature-title">Global Infrastructure</h3>
+                        <p class="feature-description">Nodes hosted across 50+ data centers worldwide for maximum reliability and performance.</p>
+                    </div>
+                    
+                    <div class="feature-card fade-in">
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-title">99.99% Uptime</h3>
+                        <p class="feature-description">Our redundant infrastructure ensures your nodes are always online and earning rewards.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Node Plans -->
+        <section class="plans" id="pricing">
+            <div class="plans-container">
+                <h2 class="section-title fade-in">Choose Your Node Plan</h2>
+                <p class="section-subtitle fade-in">Flexible plans for every validator</p>
+                
+                <div class="plans-grid">
+                    <div class="plan-card fade-in">
+                        <h3 class="plan-name">Starter Node</h3>
+                        <div class="plan-price">$399</div>
+                        <div class="plan-duration">per month</div>
+                        <ul class="plan-features">
+                            <li>1 Masternode</li>
+                            <li>5 Blockchain Networks</li>
+                            <li>Basic Analytics</li>
+                            <li>Email Support</li>
+                            <li>99.9% Uptime SLA</li>
+                        </ul>
+                        <button class="btn btn-outline" style="width: 100%;" onclick="selectPlan('starter')">Select Plan</button>
+                    </div>
+                    
+                    <div class="plan-card featured fade-in">
+                        <h3 class="plan-name">Professional Node</h3>
+                        <div class="plan-price">$599</div>
+                        <div class="plan-duration">per month</div>
+                        <ul class="plan-features">
+                            <li>5 Masternodes</li>
+                            <li>15 Blockchain Networks</li>
+                            <li>Advanced Analytics</li>
+                            <li>Priority Support</li>
+                            <li>99.99% Uptime SLA</li>
+                            <li>Auto-Compounding</li>
+                        </ul>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="selectPlan('professional')">Select Plan</button>
+                    </div>
+                    
+                    <div class="plan-card fade-in">
+                        <h3 class="plan-name">Enterprise Node</h3>
+                        <div class="plan-price">$999</div>
+                        <div class="plan-duration">per month</div>
+                        <ul class="plan-features">
+                            <li>Unlimited Masternodes</li>
+                            <li>All Blockchain Networks</li>
+                            <li>Custom Analytics</li>
+                            <li>Dedicated Support</li>
+                            <li>100% Uptime SLA</li>
+                            <li>White-Label Options</li>
+                        </ul>
+                        <button class="btn btn-outline" style="width: 100%;" onclick="selectPlan('enterprise')">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Preview -->
+        <section class="dashboard-preview" id="dashboard">
+            <div class="dashboard-container">
+                <h2 class="section-title fade-in">Powerful Dashboard</h2>
+                <p class="section-subtitle fade-in">Monitor and manage all your nodes from one place</p>
+                
+                <div class="dashboard-grid fade-in">
+                    <div class="dashboard-sidebar">
+                        <ul class="sidebar-menu">
+                            <li><a href="#" class="active">📊 Overview</a></li>
+                            <li><a href="#">⬢ My Nodes</a></li>
+                            <li><a href="#">💰 Rewards</a></li>
+                            <li><a href="#">📈 Analytics</a></li>
+                            <li><a href="#">⚙️ Settings</a></li>
+                            <li><a href="#">🔔 Notifications</a></li>
+                            <li><a href="#" onclick="window.open('https://nodejs.org/docs/latest/api/', '_blank'); return false;">📚 Documentation</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dashboard-content">
+                        <h3 style="margin-bottom: 1.5rem;">Node Overview</h3>
+                        
+                        <div class="dashboard-stats">
+                            <div class="dashboard-stat">
+                                <div class="dashboard-stat-label">Active Nodes</div>
+                                <div class="dashboard-stat-value">12</div>
+                            </div>
+                            <div class="dashboard-stat">
+                                <div class="dashboard-stat-label">Total Rewards</div>
+                                <div class="dashboard-stat-value">$24,847</div>
+                            </div>
+                            <div class="dashboard-stat">
+                                <div class="dashboard-stat-label">APY</div>
+                                <div class="dashboard-stat-value">14.2%</div>
+                            </div>
+                            <div class="dashboard-stat">
+                                <div class="dashboard-stat-label">Network Health</div>
+                                <div class="dashboard-stat-value">100%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="node-activity">
+                            <div class="activity-header">
+                                <h4>Recent Activity</h4>
+                                <span style="color: var(--success);">● All Systems Operational</span>
+                            </div>
+                            <ul class="activity-list">
+                                <li class="activity-item">
+                                    <div class="activity-indicator"></div>
+                                    <span>Node ETH-001 received reward: 0.052 ETH</span>
+                                    <span style="margin-left: auto; color: var(--gray);">2 min ago</span>
+                                </li>
+                                <li class="activity-item">
+                                    <div class="activity-indicator"></div>
+                                    <span>Node DOT-003 validated block #1,847,293</span>
+                                    <span style="margin-left: auto; color: var(--gray);">5 min ago</span>
+                                </li>
+                                <li class="activity-item">
+                                    <div class="activity-indicator"></div>
+                                    <span>Node AVAX-002 sync completed</span>
+                                    <span style="margin-left: auto; color: var(--gray);">12 min ago</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Network Status Page (Hidden by default) -->
+    <div class="network-status" id="networkStatus">
+        <div class="network-container">
+            <div class="network-header">
+                <h1 class="section-title">Network Status</h1>
+                <p class="section-subtitle">Real-time monitoring of all node networks</p>
+                <button class="btn btn-primary" onclick="showMainContent()">← Back to Main Site</button>
+            </div>
+
+            <div class="network-grid">
+                <div class="network-node">
+                    <div class="node-name">Europe Node Cluster</div>
+                    <div class="node-stats">
+                        <div class="node-stat">
+                            <span class="node-stat-label">Status</span>
+                            <span class="node-stat-value">Online</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Uptime</span>
+                            <span class="node-stat-value">99.99%</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Latency</span>
+                            <span class="node-stat-value">12ms</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Active Nodes</span>
+                            <span class="node-stat-value">3,847</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="network-node">
+                    <div class="node-name">North America Cluster</div>
+                    <div class="node-stats">
+                        <div class="node-stat">
+                            <span class="node-stat-label">Status</span>
+                            <span class="node-stat-value">Online</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Uptime</span>
+                            <span class="node-stat-value">99.98%</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Latency</span>
+                            <span class="node-stat-value">8ms</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Active Nodes</span>
+                            <span class="node-stat-value">5,234</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="network-node">
+                    <div class="node-name">Asia Pacific Cluster</div>
+                    <div class="node-stats">
+                        <div class="node-stat">
+                            <span class="node-stat-label">Status</span>
+                            <span class="node-stat-value">Online</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Uptime</span>
+                            <span class="node-stat-value">99.97%</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Latency</span>
+                            <span class="node-stat-value">24ms</span>
+                        </div>
+                        <div class="node-stat">
+                            <span class="node-stat-label">Active Nodes</span>
+                            <span class="node-stat-value">2,766</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="network-map">
+                <div class="network-visualization" id="networkViz"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section (Hidden by default) -->
+    <div class="contact-section" id="contactSection">
+        <div class="contact-container">
+            <h2 class="section-title">Contact Us</h2>
+            <p class="section-subtitle">Get in touch with our support team</p>
+            
+            <div class="contact-form">
+                <form onsubmit="handleContactSubmit(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mobile Number *</label>
+                            <input type="tel" id="contactMobile" required placeholder="+1 234 567 8900">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="contactEmail" required placeholder="your@email.com">
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Message *</label>
+                        <textarea id="contactMessage" required placeholder="Tell us how we can help you..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Message</button>
+                </form>
+                <div class="success-message" id="contactSuccess">
+                    ✓ Your message has been sent successfully! We'll get back to you soon.
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn btn-outline" onclick="showMainContent()">← Back to Main Site</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="mainFooter">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>NodeJS</h3>
+                <p style="color: var(--gray); margin-top: 1rem;">
+                    The most trusted masternode hosting platform in the blockchain ecosystem.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="window.open('https://nodejs.org/docs/latest/api/', '_blank'); return false;">Documentation</a></li>
+                    <li><a href="#">API Reference</a></li>
+                    <li><a href="#">Node Calculator</a></li>
+                    <li><a href="#" onclick="showNetworkStatus(); return false;">Network Status</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="window.open('https://nodejs.org/en/about', '_blank'); return false;">Terms of Service</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#" onclick="showContactForm(); return false;">Contact</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showContactForm(); return false;">Help Center</a></li>
+                    <li><a href="#" onclick="window.open('https://nodejs.org/en/about', '_blank'); return false;">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Security</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 NodeJS. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('login')">×</button>
+            <h2 style="margin-bottom: 1.5rem;">Login to NodeJS</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email or Node ID</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem; color: var(--gray);">
+                Don't have an account? <a href="#" onclick="switchModal('login', 'signup')" style="color: var(--primary);">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="modal" id="signupModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('signup')">×</button>
+            <h2 style="margin-bottom: 1.5rem;">Create Your Account</h2>
+            <form onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" required placeholder="+1 234 567 8900">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" required>
+                </div>
+                <div class="form-group">
+                    <label>Wallet Address (Optional)</label>
+                    <input type="text" placeholder="0x...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem; color: var(--gray);">
+                Already have an account? <a href="#" onclick="switchModal('signup', 'login')" style="color: var(--primary);">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="modal" id="walletModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('wallet')">×</button>
+            <h2 style="margin-bottom: 1.5rem;">Connect Your Wallet</h2>
+            <div style="display: grid; gap: 1rem;">
+                <button class="btn btn-outline" onclick="connectWallet('metamask')">
+                    🦊 MetaMask
+                </button>
+                <button class="btn btn-outline" onclick="connectWallet('walletconnect')">
+                    🔗 WalletConnect
+                </button>
+                <button class="btn btn-outline" onclick="connectWallet('coinbase')">
+                    💰 Coinbase Wallet
+                </button>
+                <button class="btn btn-outline" onclick="connectWallet('trust')">
+                    🛡️ Trust Wallet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</div>
+
+    <script>
+        // Page Navigation
+        function showNetworkStatus() {
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('mainFooter').style.display = 'none';
+            document.getElementById('contactSection').style.display = 'none';
+            document.getElementById('networkStatus').classList.add('active');
+            window.scrollTo(0, 0);
+            
+            // Initialize network visualization
+            initNetworkVisualization();
+        }
+
+        function showContactForm() {
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('mainFooter').style.display = 'none';
+            document.getElementById('networkStatus').classList.remove('active');
+            document.getElementById('contactSection').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function showMainContent() {
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('mainFooter').style.display = 'block';
+            document.getElementById('networkStatus').classList.remove('active');
+            document.getElementById('contactSection').classList.remove('active');
+            window.scrollTo(0, 0);
+        }
+
+        // Network Visualization
+        function initNetworkVisualization() {
+            const viz = document.getElementById('networkViz');
+            if (viz && !viz.hasChildNodes()) {
+                // Create animated network nodes
+                const nodes = 12;
+                for (let i = 0; i < nodes; i++) {
+                    const node = document.createElement('div');
+                    node.className = 'node-point';
+                    node.style.left = Math.random() * 80 + 10 + '%';
+                    node.style.top = Math.random() * 80 + 10 + '%';
+                    node.style.animationDelay = Math.random() * 3 + 's';
+                    viz.appendChild(node);
+                    
+                    // Create connections
+                    if (i > 0 && Math.random() > 0.5) {
+                        const connection = document.createElement('div');
+                        connection.className = 'node-connection';
+                        connection.style.left = Math.random() * 80 + 10 + '%';
+                        connection.style.top = Math.random() * 80 + 10 + '%';
+                        connection.style.width = Math.random() * 200 + 50 + 'px';
+                        connection.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        viz.appendChild(connection);
+                    }
+                }
+            }
+        }
+
+        // Contact Form Handler
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            const mobile = document.getElementById('contactMobile').value;
+            const email = document.getElementById('contactEmail').value;
+            const message = document.getElementById('contactMessage').value;
+            
+            // Show success message
+            document.getElementById('contactSuccess').classList.add('show');
+            
+            // Clear form
+            event.target.reset();
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                document.getElementById('contactSuccess').classList.remove('show');
+            }, 5000);
+            
+            // In real app, would send to server
+            console.log('Contact Form Submitted:', { mobile, email, message });
+        }
+
+        // Counter Animation
+        function animateCounter() {
+            const counters = document.querySelectorAll('[data-target]');
+            
+            counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target'));
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += step;
+                    if (current < target) {
+                        if (target < 100) {
+                            counter.textContent = current.toFixed(2);
+                        } else {
+                            counter.textContent = Math.floor(current).toLocaleString();
+                        }
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        if (target < 100) {
+                            counter.textContent = target.toFixed(2);
+                        } else {
+                            counter.textContent = target.toLocaleString();
+                        }
+                    }
+                };
+                
+                updateCounter();
+            });
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    
+                    if (entry.target.classList.contains('counter')) {
+                        animateCounter();
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            observer.observe(el);
+        });
+
+        // Node Counter Animation
+        let nodeCount = 12847;
+        const nodeCounter = document.getElementById('nodeCounter');
+        if (nodeCounter) {
+            let currentCount = 12000;
+            const increment = () => {
+                if (currentCount < nodeCount) {
+                    currentCount += Math.floor(Math.random() * 10) + 1;
+                    nodeCounter.textContent = currentCount.toLocaleString();
+                    setTimeout(increment, 100);
+                } else {
+                    nodeCounter.textContent = nodeCount.toLocaleString();
+                    // Simulate random node additions
+                    setInterval(() => {
+                        nodeCount += Math.floor(Math.random() * 3);
+                        nodeCounter.textContent = nodeCount.toLocaleString();
+                    }, 5000);
+                }
+            };
+            increment();
+        }
+
+        // Modal Functions
+        function openModal(type) {
+            document.getElementById(type + 'Modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(type) {
+            document.getElementById(type + 'Modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function switchModal(from, to) {
+            closeModal(from);
+            setTimeout(() => openModal(to), 300);
+        }
+
+        // Form Handlers
+        function handleLogin(event) {
+            event.preventDefault();
+            alert('Login functionality would be implemented here');
+            closeModal('login');
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            alert('Account created successfully!');
+            closeModal('signup');
+        }
+
+        function connectWallet(type) {
+            alert(`Connecting to ${type}...`);
+            closeModal('wallet');
+        }
+
+        function selectPlan(plan) {
+            if (plan === 'enterprise') {
+                showContactForm();
+            } else {
+                openModal('signup');
+            }
+        }
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const element = document.querySelector(href);
+                    if (element) {
+                        element.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+
+        // Back to Top Button
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/hide back to top button
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const backToTop = document.getElementById('backToTop');
+            
+            if (scrolled > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+            
+            // Parallax effect for hero
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Initialize counters when page loads
+        window.addEventListener('load', () => {
+            setTimeout(animateCounter, 500);
+        });
+    </script>
+</body>
+</html>
