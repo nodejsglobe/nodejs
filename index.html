@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NodeJS - Decentralized Node Infrastructure</title>
     <style>
+        /* ... (keep all existing styles, unchanged) ... */
         * {
             margin: 0;
             padding: 0;
@@ -87,6 +88,7 @@
             display: flex;
             gap: 2rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
@@ -98,6 +100,26 @@
 
         .nav-links a:hover {
             color: var(--primary);
+        }
+
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(104, 160, 99, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid var(--primary);
+            font-size: 0.9rem;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .wallet-info span {
+            color: var(--primary);
+            font-weight: 600;
         }
 
         .btn {
@@ -130,6 +152,11 @@
         .btn-outline:hover {
             background: var(--primary);
             color: var(--light);
+        }
+
+        .btn-disabled {
+            opacity: 0.5;
+            pointer-events: none;
         }
 
         /* Hero Section */
@@ -938,6 +965,17 @@
         .success-message.show {
             display: block;
         }
+
+        /* Wallet connection status */
+        #walletStatus {
+            margin-left: 1rem;
+            font-size: 0.9rem;
+        }
+        .wallet-connected {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+        }
     </style>
 </head>
 <body>
@@ -951,7 +989,9 @@
                 <a href="#nodes">Nodes</a>
                 <a href="#pricing">Pricing</a>
                 <a href="#dashboard">Dashboard</a>
-                <a href="#" class="btn btn-outline" onclick="openModal('wallet')">Connect Wallet</a>
+                <!-- Wallet info / connect button dynamically updated -->
+                <div id="walletInfoContainer"></div>
+                <a href="#" class="btn btn-outline" onclick="openModal('wallet')" id="connectWalletBtn">Connect Wallet</a>
                 <a href="#" class="btn btn-primary" onclick="openModal('login')">Get Started</a>
             </div>
         </div>
@@ -1398,7 +1438,7 @@
             <button class="modal-close" onclick="closeModal('wallet')">×</button>
             <h2 style="margin-bottom: 1.5rem;">Connect Your Wallet</h2>
             <div style="display: grid; gap: 1rem;">
-                <button class="btn btn-outline" onclick="connectWallet('metamask')">
+                <button class="btn btn-outline" onclick="connectWallet('metamask')" id="metaMaskConnectBtn">
                     🦊 MetaMask
                 </button>
                 <button class="btn btn-outline" onclick="connectWallet('walletconnect')">
@@ -1411,6 +1451,7 @@
                     🛡️ Trust Wallet
                 </button>
             </div>
+            <div id="walletError" style="color: var(--danger); margin-top: 1rem; text-align: center;"></div>
         </div>
     </div>
 
@@ -1418,6 +1459,106 @@
     <div class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</div>
 
     <script>
+        // ---------- MetaMask Wallet Connection (Fixed) ----------
+        let currentAccount = null;
+        let walletConnected = false;
+
+        // Update UI based on wallet connection
+        function updateWalletUI(account) {
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const walletInfoContainer = document.getElementById('walletInfoContainer');
+            
+            if (account) {
+                // Show wallet info and hide connect button
+                const shortAddress = account.slice(0, 6) + '...' + account.slice(-4);
+                walletInfoContainer.innerHTML = `<div class="wallet-info"><span>🦊</span> ${shortAddress}</div>`;
+                connectBtn.style.display = 'none';
+                console.log('Wallet connected:', account);
+            } else {
+                walletInfoContainer.innerHTML = '';
+                connectBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Simplified check: just see if ethereum exists
+        function hasEthereumProvider() {
+            return typeof window.ethereum !== 'undefined';
+        }
+
+        // Connect to MetaMask (or any injected provider)
+        async function connectMetaMask() {
+            const errorDiv = document.getElementById('walletError');
+            errorDiv.innerText = ''; // clear previous errors
+
+            if (!hasEthereumProvider()) {
+                errorDiv.innerText = 'No Ethereum wallet detected. Please install MetaMask or another wallet.';
+                return;
+            }
+            
+            try {
+                // Request accounts - this will trigger the wallet popup
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (accounts.length > 0) {
+                    currentAccount = accounts[0];
+                    walletConnected = true;
+                    updateWalletUI(currentAccount);
+                    closeModal('wallet');
+                    alert(`Wallet connected: ${currentAccount}`);
+                }
+            } catch (error) {
+                console.error('User rejected or error:', error);
+                errorDiv.innerText = 'Connection failed. You may have rejected the request.';
+            }
+        }
+
+        // Handle account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                if (accounts.length === 0) {
+                    // User disconnected
+                    currentAccount = null;
+                    walletConnected = false;
+                    updateWalletUI(null);
+                } else {
+                    currentAccount = accounts[0];
+                    updateWalletUI(currentAccount);
+                }
+            });
+
+            // Handle chain changes (optional)
+            window.ethereum.on('chainChanged', (chainId) => {
+                console.log('Chain changed to', chainId);
+                // You could refresh or update UI as needed
+            });
+        }
+
+        // Modify the connectWallet function to handle MetaMask specifically
+        function connectWallet(type) {
+            if (type === 'metamask') {
+                connectMetaMask();
+            } else {
+                alert(`${type} connection would be implemented here.`);
+                closeModal('wallet');
+            }
+        }
+
+        // On page load, check if already connected
+        window.addEventListener('load', async () => {
+            if (hasEthereumProvider()) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        currentAccount = accounts[0];
+                        walletConnected = true;
+                        updateWalletUI(currentAccount);
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            }
+        });
+
+        // ---------- Existing Functions (unchanged) ----------
         // Page Navigation
         function showNetworkStatus() {
             document.getElementById('mainContent').style.display = 'none';
@@ -1450,7 +1591,6 @@
         function initNetworkVisualization() {
             const viz = document.getElementById('networkViz');
             if (viz && !viz.hasChildNodes()) {
-                // Create animated network nodes
                 const nodes = 12;
                 for (let i = 0; i < nodes; i++) {
                     const node = document.createElement('div');
@@ -1460,7 +1600,6 @@
                     node.style.animationDelay = Math.random() * 3 + 's';
                     viz.appendChild(node);
                     
-                    // Create connections
                     if (i > 0 && Math.random() > 0.5) {
                         const connection = document.createElement('div');
                         connection.className = 'node-connection';
@@ -1481,18 +1620,12 @@
             const email = document.getElementById('contactEmail').value;
             const message = document.getElementById('contactMessage').value;
             
-            // Show success message
             document.getElementById('contactSuccess').classList.add('show');
-            
-            // Clear form
             event.target.reset();
-            
-            // Hide success message after 5 seconds
             setTimeout(() => {
                 document.getElementById('contactSuccess').classList.remove('show');
             }, 5000);
             
-            // In real app, would send to server
             console.log('Contact Form Submitted:', { mobile, email, message });
         }
 
@@ -1566,7 +1699,6 @@
                     setTimeout(increment, 100);
                 } else {
                     nodeCounter.textContent = nodeCount.toLocaleString();
-                    // Simulate random node additions
                     setInterval(() => {
                         nodeCount += Math.floor(Math.random() * 3);
                         nodeCounter.textContent = nodeCount.toLocaleString();
@@ -1580,6 +1712,9 @@
         function openModal(type) {
             document.getElementById(type + 'Modal').classList.add('active');
             document.body.style.overflow = 'hidden';
+            if (type === 'wallet') {
+                document.getElementById('walletError').innerText = '';
+            }
         }
 
         function closeModal(type) {
@@ -1603,11 +1738,6 @@
             event.preventDefault();
             alert('Account created successfully!');
             closeModal('signup');
-        }
-
-        function connectWallet(type) {
-            alert(`Connecting to ${type}...`);
-            closeModal('wallet');
         }
 
         function selectPlan(plan) {
@@ -1643,7 +1773,6 @@
             });
         }
 
-        // Show/hide back to top button
         window.addEventListener('scroll', () => {
             const scrolled = window.pageYOffset;
             const backToTop = document.getElementById('backToTop');
@@ -1654,20 +1783,15 @@
                 backToTop.classList.remove('visible');
             }
             
-            // Parallax effect for hero
             const hero = document.querySelector('.hero');
             if (hero) {
                 hero.style.transform = `translateY(${scrolled * 0.5}px)`;
             }
         });
 
-        // Initialize counters when page loads
         window.addEventListener('load', () => {
             setTimeout(animateCounter, 500);
         });
     </script>
 </body>
-
 </html>
-
-
