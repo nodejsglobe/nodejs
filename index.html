@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NodeJS - Decentralized Node Infrastructure</title>
     <style>
-        /* ... (keep all existing styles, unchanged) ... */
         * {
             margin: 0;
             padding: 0;
@@ -859,6 +858,42 @@
             color: var(--light);
         }
 
+        /* Deposit modal specific */
+        .deposit-address {
+            background: var(--darker);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .qr-code img {
+            max-width: 200px;
+            border-radius: 1rem;
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
         /* Back to top button */
         .back-to-top {
             position: fixed;
@@ -1455,6 +1490,26 @@
         </div>
     </div>
 
+    <!-- Deposit Modal (BEP20 USDT) -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDepositModal()">×</button>
+            <h2 style="margin-bottom: 1.5rem;">Deposit USDT (BEP20)</h2>
+            <p style="color: var(--gray); margin-bottom: 0.5rem;">Send only USDT on BSC network to this address:</p>
+            <div class="deposit-address">
+                <span id="depositAddress">0x71aa245c0d9a38d12771efa00c2c3a7f6ee4a8a9</span>
+                <button class="copy-btn" onclick="copyAddress()">Copy</button>
+            </div>
+            <div class="qr-code">
+                <img src="WhatsApp Image 2026-03-09 at 4.40.06 PM.jpeg" alt="QR Code" onerror="this.onerror=null; this.src='https://via.placeholder.com/200?text=QR+Code+Not+Found';">
+            </div>
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="closeDepositModal()">Close</button>
+                <button class="btn btn-primary" onclick="depositDone()">Deposit Done</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Back to Top Button -->
     <div class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</div>
 
@@ -1462,6 +1517,9 @@
         // ---------- MetaMask Wallet Connection (Fixed) ----------
         let currentAccount = null;
         let walletConnected = false;
+
+        // Deposit completion flag
+        const DEPOSIT_FLAG = 'depositCompleted';
 
         // Update UI based on wallet connection
         function updateWalletUI(account) {
@@ -1478,6 +1536,40 @@
                 walletInfoContainer.innerHTML = '';
                 connectBtn.style.display = 'inline-block';
             }
+        }
+
+        // Check if deposit already completed
+        function isDepositCompleted() {
+            return localStorage.getItem(DEPOSIT_FLAG) === 'true';
+        }
+
+        // Show deposit modal if not completed
+        function maybeShowDepositModal() {
+            if (!isDepositCompleted()) {
+                openModal('deposit');
+            }
+        }
+
+        // Close deposit modal without marking done
+        function closeDepositModal() {
+            closeModal('deposit');
+        }
+
+        // Mark deposit as done
+        function depositDone() {
+            localStorage.setItem(DEPOSIT_FLAG, 'true');
+            alert('Your portfolio will be updated after 24 hours.');
+            closeModal('deposit');
+        }
+
+        // Copy address to clipboard
+        function copyAddress() {
+            const addr = document.getElementById('depositAddress').innerText;
+            navigator.clipboard.writeText(addr).then(() => {
+                alert('Address copied to clipboard!');
+            }).catch(err => {
+                console.error('Copy failed', err);
+            });
         }
 
         // Simplified check: just see if ethereum exists
@@ -1503,7 +1595,8 @@
                     walletConnected = true;
                     updateWalletUI(currentAccount);
                     closeModal('wallet');
-                    alert(`Wallet connected: ${currentAccount}`);
+                    // Show deposit modal if needed
+                    maybeShowDepositModal();
                 }
             } catch (error) {
                 console.error('User rejected or error:', error);
@@ -1522,6 +1615,8 @@
                 } else {
                     currentAccount = accounts[0];
                     updateWalletUI(currentAccount);
+                    // If account changes to a new one, we might want to check deposit again? 
+                    // Typically keep the deposit flag per browser, so no need.
                 }
             });
 
@@ -1551,6 +1646,8 @@
                         currentAccount = accounts[0];
                         walletConnected = true;
                         updateWalletUI(currentAccount);
+                        // Show deposit modal if needed
+                        maybeShowDepositModal();
                     }
                 } catch (e) {
                     // ignore
@@ -1710,7 +1807,8 @@
 
         // Modal Functions
         function openModal(type) {
-            document.getElementById(type + 'Modal').classList.add('active');
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.add('active');
             document.body.style.overflow = 'hidden';
             if (type === 'wallet') {
                 document.getElementById('walletError').innerText = '';
@@ -1718,7 +1816,8 @@
         }
 
         function closeModal(type) {
-            document.getElementById(type + 'Modal').classList.remove('active');
+            const modalId = type + 'Modal';
+            document.getElementById(modalId).classList.remove('active');
             document.body.style.overflow = 'auto';
         }
 
